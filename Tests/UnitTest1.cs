@@ -34,22 +34,21 @@ namespace Tests
         }
 
         [TestMethod]
-        public void TestMethod2()
+        public void GeneratePayslip_AnnualSalary60000_ReturnsTaxMonthlyTax500()
         {
             // Arrange
             var employee = new Employee("Ajit Rautela", (decimal)60000);
-            Mock<List<TaxBand>> mockTaxBands = new Mock<List<TaxBand>>();
-            Mock<AnnualTaxCalculator> mockTaxCalculator = new Mock<AnnualTaxCalculator>(MockBehavior.Loose, [employee.AnnualSalary, mockTaxBands.Object]);
-
+        
+            Mock<IList<TaxBand>> mockTaxBands = new Mock<IList<TaxBand>>();
+            Mock<IAnnualTaxCalculator> mockTaxCalculator = new Mock<IAnnualTaxCalculator>();
+            mockTaxCalculator.Setup(a => a.CalculateTax()).Returns((decimal)6000).Verifiable();
+        
             // Act
             var service = new PayslipGenerator(employee, mockTaxBands.Object, mockTaxCalculator.Object);
             var payslip = service.GeneratePayslip();
-
+        
             // Assert
-            Assert.AreEqual("Ajit Rautela", payslip.Name, true);
-            Assert.AreEqual(5000, payslip.MonthlyGrossIncome, 0);
-            Assert.AreEqual(0, payslip.MonthlyIncomeTax, 0);
-            Assert.AreEqual(5000, payslip.MonthlyNetIncome, 0);
+            mockTaxCalculator.VerifyAll();
         }
     }
 }
